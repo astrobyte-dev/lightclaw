@@ -154,34 +154,44 @@ After applying, render and explicitly ask yourself: "Looking at this result vs. 
 
 (Derived from high-contrast, low-key animal portraiture — the Highland cow aesthetic)
 
-**Stage 1 — Global:**
-- Exposure: -0.8 (darken the scene significantly — key move)
-- Highlights: -70 (prevent any blown areas)
-- Shadows: -20 (keep shadows dark — do NOT lift them; this is moody, not airy)
-- Whites: -30
-- Blacks: -70 (crush deep blacks for drama — most important single slider)
-- Contrast: +40
-- Clarity: +25 (bring out fur/texture/feather detail)
-- Texture: +30
-- Vibrance: -15 (pull back oversaturation)
-- Saturation: -10
+**CRITICAL PRINCIPLE: The subject must be BRIGHTER than the background — not both dark together. The moody look comes from selective contrast, not uniform crushing. Always use masks to split subject and background treatment.**
 
-**HSL — kill distracting background colors:**
-- Green Saturation: -80 (grass becomes near-monochrome)
-- Green Luminance: -40 (dark the grass tones)
-- Yellow Saturation: -50 (hay/straw/mud goes neutral)
-- Yellow Luminance: -20
-- Aqua Saturation: -40 (water/sky desaturation)
+**Stage 1 — Global (conservative — do not over-darken):**
+- Exposure: -0.3 (modest global pull — the subject mask will recover the animal)
+- Highlights: -60
+- Shadows: 0 (do not lift globally — let the mask handle it per-region)
+- Whites: -20
+- Blacks: -40 (moderate crush only — too much kills the subject detail)
+- Contrast: +30
+- Clarity: +20
+- Texture: +25
+- Vibrance: -10
+- Saturation: -5
+
+**HSL — desaturate background colors without touching the animal's warm tones:**
+- Green Saturation: -70 (grass becomes near-monochrome)
+- Green Luminance: -30
+- Yellow Saturation: -40 (mud/straw desaturated)
+- Yellow Luminance: -15
+- Aqua Saturation: -40
+- Blue Saturation: -30
+- (Do NOT touch Red or Orange — those are the animal's warm fur tones)
 
 **Color grade:**
-- ShadowColorH: warm amber (approx 30–40°), ShadowColorS: 15–25
-- HighlightColorH: cool blue (approx 210°), HighlightColorS: 10
+- ShadowColorH: cool teal (~200°), ShadowColorS: 20 (cold dark shadows)
+- HighlightColorH: warm amber (~35°), HighlightColorS: 15 (warm animal fur)
 
-**Stage 2 — Local masks:**
-- Subject mask (MaskSubType 1): Exposure +0.6, Texture +15, Clarity +10, Saturation +10 (warm up and bring out the animal)
-- Inverse subject mask (background): Exposure -0.4, Saturation -20, Dehaze +10 (push background further back)
+**Stage 2 — Local masks (THIS IS THE KEY STEP — do not skip):**
+- **Subject mask (MaskSubType 1)**: Exposure +0.7, Shadows +40, Texture +20, Clarity +15, Saturation +15, Warmth/Temperature shift warm — this is what makes the animal glow
+- **Background (inverse subject mask)**: Exposure -0.8, Blacks -30, Saturation -25, Dehaze +15 — this is what makes the background collapse to near-black
 
-**What this achieves:** Subject pops forward with warm, detailed tones; background collapses to near-black or desaturated dark — creating the same studio-light-against-dark-wall illusion even in an outdoor daylight shot.
+**Vignette:**
+- Amount: -60, Midpoint: 25, Roundness: -20 (tight, slightly rectangular — pulls corners to black)
+
+**Sharpening:**
+- Amount: 70, Radius: 1.2, Detail: 50, Masking: 40
+
+**What this achieves:** The subject mask lifts and warms the animal while the inverse mask darkens the background — creating a bright-subject-against-dark-background split that reads as dramatic studio lighting, even in daylight. Global settings alone cannot do this and will just make everything dark and muddy.
 
 ## SELF-EVALUATION GUIDE
 
