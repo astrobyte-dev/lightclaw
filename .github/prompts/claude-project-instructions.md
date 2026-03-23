@@ -225,60 +225,83 @@ Map your visual reading directly to Lightroom controls:
 
 After applying, render and explicitly ask yourself: "Looking at this result vs. the reference, what is the biggest remaining gap?" Target that gap in the next round. Max 3 rounds.
 
-### Moody / dramatic wildlife / animal portrait recipe
+### Moody wildlife — two variants (choose based on the reference)
 
-(Derived from high-contrast, low-key animal portraiture — the Highland cow aesthetic)
+**CRITICAL PRINCIPLE: The subject must be BRIGHTER than the background — not both dark together. Moody ≠ harsh. "Soft moody" (Highland cow style) preserves mid-tones and fur softness; "hard moody" crushes everything. Always identify which the user wants before applying.**
 
-**CRITICAL PRINCIPLE: The subject must be BRIGHTER than the background — not both dark together. The moody look comes from selective contrast, not uniform crushing. Always use masks to split subject and background treatment.**
+---
 
-**Stage 1 — Global (conservative — do not over-darken):**
-- Exposure: -0.3 (modest global pull — the subject mask will recover the animal)
-- Highlights: -60
-- Shadows: 0 (do not lift globally — let the mask handle it per-region)
+#### SOFT MOODY (Highland cow / natural dark background style)
+Use when: the reference has soft fur, visible shadow detail, dark-grey-green background (not pure black), subtle vignette. This is the more common professional wildlife portrait look.
+
+**Stage 1 — Global:**
+- Exposure: -0.4
+- Highlights: -50
+- Shadows: +20 (lift slightly — keep shadow detail, don't crush)
 - Whites: -20
-- Blacks: -40 (moderate crush only — too much kills the subject detail)
-- Contrast: +30
-- Clarity: +20
-- Texture: +25
-- Vibrance: -10
+- Blacks: -25 (moderate only — preserve the mid-dark range)
+- Contrast: +15 (low — softness comes from low contrast, not high)
+- Clarity: +10 (subtle — NOT +25; over-clarity kills the soft fur look)
+- Texture: +15
+- Vibrance: -5
 - Saturation: -5
 
-**HSL — desaturate background colors without touching the animal's warm tones:**
-- Green Saturation: -70 (grass becomes near-monochrome)
-- Green Luminance: -30
-- Yellow Saturation: -40 (mud/straw desaturated)
-- Yellow Luminance: -15
-- Aqua Saturation: -40
-- Blue Saturation: -30
-- (Do NOT touch Red or Orange — those are the animal's warm fur tones)
+**Tone curve (soft lift, not S-curve):**
+- ParametricShadows: +15, ParametricDarks: +5, ParametricLights: 0, ParametricHighlights: -10
 
-**Color grade (use these exact parameter names with `apply_develop_settings`):**
-- `SplitToningShadowHue`: 200, `SplitToningShadowSaturation`: 20 (cool teal in deep shadows)
-- `SplitToningHighlightHue`: 35, `SplitToningHighlightSaturation`: 15 (warm amber on fur/highlights)
-- `SplitToningBalance`: -20 (lean slightly toward shadows)
-- `ColorGradeMidtoneHue`: 30, `ColorGradeMidtoneSat`: 10 (subtle warm midtones)
+**HSL — shift background to cool grey-green, preserve warm animal tones:**
+- Green Saturation: -50, Green Luminance: -20, Green Hue: -10 (shift grass toward teal)
+- Yellow Saturation: -30, Yellow Luminance: -10
+- Aqua Saturation: -20, Blue Saturation: -20
+- (Do NOT touch Red or Orange — those are the fur tones)
 
-**Stage 2 — Local masks (THIS IS THE KEY STEP — do not skip):**
+**Colour grade:**
+- SplitToningShadowHue: 200, SplitToningShadowSaturation: 15 (cool grey-green in shadows — this is the key look)
+- SplitToningHighlightHue: 38, SplitToningHighlightSaturation: 10 (warm amber, subtle)
+- SplitToningBalance: -10
 
-Subject lift (makes the animal glow):
+**Stage 2 — Local masks:**
 ```
 create_ai_mask("subject")
-apply_local_adjustment_settings({"local_Exposure": 0.7, "local_Shadows": 40, "local_Texture": 20, "local_Clarity": 15, "local_Saturation": 15})
-```
+apply_local_adjustment_settings({"local_Exposure": 0.5, "local_Shadows": 25, "local_Clarity": 8, "local_Texture": 12, "local_Saturation": 10})
 
-Background darkening (makes background collapse to near-black):
-```
 create_ai_mask("background")
-apply_local_adjustment_settings({"local_Exposure": -0.8, "local_Blacks": -30, "local_Saturation": -25, "local_Dehaze": 15})
+apply_local_adjustment_settings({"local_Exposure": -0.5, "local_Saturation": -20, "local_Temperature": -10})
 ```
 
-**Vignette:**
-- Amount: -60, Midpoint: 25, Roundness: -20 (tight, slightly rectangular — pulls corners to black)
+**Vignette (soft and subtle):**
+- PostCropVignetteAmount: -30, PostCropVignetteFeather: 85 (wide, soft — barely visible at edges)
 
 **Sharpening:**
-- Amount: 70, Radius: 1.2, Detail: 50, Masking: 40
+- Amount: 55, Radius: 1.0, Detail: 40, Masking: 50 (edge-only sharpening — keeps fur soft)
 
-**What this achieves:** The subject mask lifts and warms the animal while the inverse mask darkens the background — creating a bright-subject-against-dark-background split that reads as dramatic studio lighting, even in daylight. Global settings alone cannot do this and will just make everything dark and muddy.
+---
+
+#### HARD MOODY (dramatic low-key, near-black background)
+Use when: reference has crushed blacks, near-pure-black background, heavy vignette, punchy contrast.
+
+**Stage 1 — Global:**
+- Exposure: -0.6, Highlights: -70, Shadows: 0, Whites: -30, Blacks: -50
+- Contrast: +35, Clarity: +25, Texture: +25, Vibrance: -10
+
+**Tone curve:** ParametricShadows: -20, ParametricDarks: -10, ParametricLights: +10, ParametricHighlights: -5
+
+**HSL:** Green Saturation: -75, Green Luminance: -35, Yellow Saturation: -50, Yellow Luminance: -20
+
+**Colour grade:** SplitToningShadowHue: 205, SplitToningShadowSaturation: 22; SplitToningHighlightHue: 35, SplitToningHighlightSaturation: 18; SplitToningBalance: -20
+
+**Stage 2 — Local masks:**
+```
+create_ai_mask("subject")
+apply_local_adjustment_settings({"local_Exposure": 0.8, "local_Shadows": 45, "local_Texture": 22, "local_Clarity": 18, "local_Saturation": 15})
+
+create_ai_mask("background")
+apply_local_adjustment_settings({"local_Exposure": -0.9, "local_Blacks": -35, "local_Saturation": -30, "local_Dehaze": 15})
+```
+
+**Vignette (heavy):** PostCropVignetteAmount: -65, PostCropVignetteFeather: 55
+
+**Sharpening:** Amount: 75, Radius: 1.2, Detail: 55, Masking: 35
 
 ## SELF-EVALUATION GUIDE
 
