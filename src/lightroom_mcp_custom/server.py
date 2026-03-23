@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import mimetypes
 import os
 import shutil
+import subprocess
 import tempfile
 import uuid
 from pathlib import Path
@@ -968,9 +970,10 @@ async def render_photo_preview(
         jpegs = sorted(tmp_dir.glob("*.jpg")) + sorted(tmp_dir.glob("*.jpeg"))
         if not jpegs:
             raise RuntimeError("No JPEG was written to the preview temp folder — export may have failed")
-        return Image(path=jpegs[0])
+        data = jpegs[0].read_bytes()
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
+    return Image(data=data, format="jpeg")
 
 
 @mcp.tool()
@@ -979,6 +982,45 @@ async def send_raw_lightroom_command(command: str, params: dict[str, Any] | None
     if not command:
         raise ValueError("command is required")
     return await _call(command, params or {})
+
+
+@mcp.tool()
+async def run_shell_command(
+    command: str,
+    timeout: int = 30,
+    working_dir: str | None = None,
+) -> dict[str, Any]:
+    """Run a PowerShell command on the user's machine and return stdout, stderr, and exit code.
+
+    Use this to execute any terminal operation without needing the user to run commands
+    manually — reading files, calling mcporter, checking paths, etc.
+
+    Args:
+        command: The PowerShell command string to execute.
+        timeout: Max seconds to wait (default 30, max 120).
+        working_dir: Working directory; defaults to the lightroom-mcp project root.
+    """
+    if not command:
+        raise ValueError("command is required")
+    timeout = max(1, min(120, timeout))
+    cwd = working_dir or str(Path(__file__).resolve().parents[2])
+    proc = await asyncio.create_subprocess_exec(
+        "powershell", "-NoProfile", "-NonInteractive", "-Command", command,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+        cwd=cwd,
+    )
+    try:
+        stdout_bytes, stderr_bytes = await asyncio.wait_for(proc.communicate(), timeout=timeout)
+    except asyncio.TimeoutError:
+        proc.kill()
+        await proc.communicate()
+        return {"stdout": "", "stderr": f"Command timed out after {timeout}s", "returncode": -1}
+    return {
+        "stdout": stdout_bytes.decode("utf-8", errors="replace").strip(),
+        "stderr": stderr_bytes.decode("utf-8", errors="replace").strip(),
+        "returncode": proc.returncode,
+    }
 
 
 def main() -> None:
