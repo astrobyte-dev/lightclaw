@@ -101,6 +101,88 @@ Stage 2 (local): Subject mask — Texture +20, Clarity +15 for selective sharpne
 Stage 1 (global): Exposure -0.3 to -0.7, Highlights -80, Whites -20, Shadows +20, Blacks -10
 Stage 2 (local): Sky mask — additional Highlights -20 if sky still clips; subject mask — Clarity +15 to recover detail
 
+## REFERENCE IMAGE / STYLE MATCHING
+
+When the user provides a reference photo and asks you to match its look, follow this analysis framework before touching any sliders.
+
+### Step 1 — Deconstruct the reference image visually
+
+Analyze the reference across these 5 dimensions and write down your reading of each:
+
+1. **Tonal structure** — Is it high-key (bright, airy) or low-key (dark, moody)? Where do the shadows sit — lifted, natural, or crushed? Are highlights recovered or blown?
+2. **Contrast character** — Soft/flat or punchy/dramatic? Is the contrast in the shadows, midtones, or highlights? (S-curve shape)
+3. **Color palette** — What is the dominant color temperature (warm/cool/neutral)? Are any colors desaturated or shifted? Is there a color grade in the shadows/highlights?
+4. **Subject isolation** — How separated is the subject from the background in terms of brightness, saturation, and sharpness?
+5. **Texture & mood** — How much micro-contrast/clarity? Is skin/fur/surface detail emphasized or smoothed?
+
+### Step 2 — Identify what is transferable vs. scene-dependent
+
+**Transferable** (you can replicate with Lightroom):
+- Tonal curve shape and contrast level
+- Color temperature and HSL channel adjustments
+- Saturation treatment (global and per-channel)
+- Color grading (shadow/highlight color cast)
+- Clarity, texture, dehaze levels
+- Relative subject/background brightness ratio via masks
+
+**Not transferable** (honest with the user about these):
+- Lens bokeh / depth of field blur (can't add real blur in Lightroom; Lightroom's blur is limited)
+- Studio vs. outdoor lighting direction and quality
+- Dynamic range of a scene that simply wasn't captured
+- Subject replacement or background replacement (those are Photoshop/AIGC)
+
+### Step 3 — Build a parameter translation
+
+Map your visual reading directly to Lightroom controls:
+
+| Reference observation | Lightroom translation |
+|---|---|
+| Very dark background | Exposure -0.5 to -1.5 global + background area darkened via inverse subject mask |
+| Crushed blacks | Blacks -50 to -80, lift point on tone curve removed |
+| Warm fur/skin tones preserved | HSL: boost Red/Orange saturation; Temperature +100 to +300 |
+| Desaturated background greens | HSL: Green Saturation -60 to -90, Green Luminance -30 |
+| Dramatic contrast | Contrast +30 to +50, or S-curve: pull shadows down, push upper midtones up |
+| Cinematic color grade | ShadowTint warm (+amber), HighlightTint slightly cool |
+| High fur/fur texture detail | Texture +25 to +40, Clarity +15 to +25, Sharpening Amount 60–80 |
+| Subject brighter than background | Subject mask (MaskSubType 1): Exposure +0.5 to +1.0 |
+
+### Step 4 — Apply, render, compare
+
+After applying, render and explicitly ask yourself: "Looking at this result vs. the reference, what is the biggest remaining gap?" Target that gap in the next round. Max 3 rounds.
+
+### Moody / dramatic wildlife / animal portrait recipe
+
+(Derived from high-contrast, low-key animal portraiture — the Highland cow aesthetic)
+
+**Stage 1 — Global:**
+- Exposure: -0.8 (darken the scene significantly — key move)
+- Highlights: -70 (prevent any blown areas)
+- Shadows: -20 (keep shadows dark — do NOT lift them; this is moody, not airy)
+- Whites: -30
+- Blacks: -70 (crush deep blacks for drama — most important single slider)
+- Contrast: +40
+- Clarity: +25 (bring out fur/texture/feather detail)
+- Texture: +30
+- Vibrance: -15 (pull back oversaturation)
+- Saturation: -10
+
+**HSL — kill distracting background colors:**
+- Green Saturation: -80 (grass becomes near-monochrome)
+- Green Luminance: -40 (dark the grass tones)
+- Yellow Saturation: -50 (hay/straw/mud goes neutral)
+- Yellow Luminance: -20
+- Aqua Saturation: -40 (water/sky desaturation)
+
+**Color grade:**
+- ShadowColorH: warm amber (approx 30–40°), ShadowColorS: 15–25
+- HighlightColorH: cool blue (approx 210°), HighlightColorS: 10
+
+**Stage 2 — Local masks:**
+- Subject mask (MaskSubType 1): Exposure +0.6, Texture +15, Clarity +10, Saturation +10 (warm up and bring out the animal)
+- Inverse subject mask (background): Exposure -0.4, Saturation -20, Dehaze +10 (push background further back)
+
+**What this achieves:** Subject pops forward with warm, detailed tones; background collapses to near-black or desaturated dark — creating the same studio-light-against-dark-wall illusion even in an outdoor daylight shot.
+
 ## SELF-EVALUATION GUIDE
 
 After each render, assess against these dimensions:
