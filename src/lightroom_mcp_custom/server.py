@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import io
 import logging
 import mimetypes
 import os
@@ -942,20 +943,21 @@ async def export_photos(
 @mcp.tool()
 async def render_photo_preview(
     local_ids: list[int] | None = None,
-    quality: int = 80,
-    max_size: int = 1920,
+    quality: int = 70,
+    max_size: int = 1024,
 ) -> Image:
     """Export the current photo with all develop edits applied and return it as an
     inline image so the AI can visually inspect the result.
 
-    Exports to a temporary folder, reads the JPEG, and returns it as base64-encoded
-    image content. The temp folder is cleaned up automatically.
+    Exports to a temporary folder, resizes to max_size on the longest edge, and
+    returns as base64-encoded JPEG. The temp folder is cleaned up automatically.
 
     Args:
         local_ids: IDs of specific photos to preview (defaults to selected photos).
-        quality: JPEG quality 1-100 (default 80).
-        max_size: Longest edge in pixels for the preview (default 1920).
+        quality: JPEG quality 1-100 (default 70).
+        max_size: Longest edge in pixels for the preview (default 1024, keep ≤1500 to stay under 1MB).
     """
+    from PIL import Image as PILImage
     ids = validate_local_ids(local_ids)
     tmp_dir = Path(tempfile.gettempdir()) / f"lightclaw_preview_{uuid.uuid4().hex}"
     tmp_dir.mkdir(parents=True, exist_ok=True)
@@ -970,7 +972,11 @@ async def render_photo_preview(
         jpegs = sorted(tmp_dir.glob("*.jpg")) + sorted(tmp_dir.glob("*.jpeg"))
         if not jpegs:
             raise RuntimeError("No JPEG was written to the preview temp folder — export may have failed")
-        data = jpegs[0].read_bytes()
+        img = PILImage.open(jpegs[0])
+        img.thumbnail((max_size, max_size), PILImage.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=max(1, min(100, quality)), optimize=True)
+        data = buf.getvalue()
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
     return Image(data=data, format="jpeg")

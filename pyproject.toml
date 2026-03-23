@@ -29,6 +29,7 @@ dependencies = [
   "mcp",
   "anyio",
   "pydantic>=2",
+  "pillow>=10",
 ]
 
 [project.optional-dependencies]
